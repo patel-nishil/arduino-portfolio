@@ -39,7 +39,14 @@ then repeating. Each LED represents one bit — bit 0 (LSB) on the right to bit 
 - Arrays of pins make it easy to control multiple outputs in a loop
 
 ## Checkpoint Answer
-[fill in after answering]
+To extract bit 2 from count: (count >> 2) & 1
+
+- (count >> 2) shifts count right by 2 positions, moving bit 2 into the bit 0 position
+- & 1 masks all other bits to 0, leaving only the value of bit 0 (which is now bit 2)
+- The result is 1 if bit 2 was set, 0 if not
+
+& 1 is a bitwise mask, not a comparison — it forces all bits except bit 0 to 0.
+A comparison would use ==, which returns true/false rather than isolating a bit.
 
 ## Connection to FPGA
 This is a 4-bit register with a counter — one of the most fundamental
