@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // M2 — Button + LED with Debounce
 // Concept: digitalRead() reads pin voltage — HIGH or LOW.
 // Problem: physical buttons bounce — one press sends many rapid signals.
