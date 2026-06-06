@@ -1,29 +1,32 @@
 # M1 — Blink LED
 
 ## What This Does
-Controls the built-in LED on pin 13 using digital output.
-Blinks at 1Hz (500ms on, 500ms off) by default.
+Blinks the built-in LED on pin 13 ON and OFF every 500ms.
 
 ## Pins Used
 | Pin | Component |
 |-----|-----------|
 | 13  | Built-in LED (labeled L on the board) |
 
+## Wiring Notes
+No external wiring needed. The built-in LED is connected to pin 13 on the board.
+
 ## What I Learned
-- `pinMode()` configures a pin as INPUT or OUTPUT before using it
-- `digitalWrite()` sets a pin HIGH (5V = on) or LOW (0V = off)
-- `delay()` pauses execution in milliseconds — controls timing
-- The HIGH delay controls on-time (flash length)
-- The LOW delay controls off-time (gap between flashes)
-- Together they set frequency and duty cycle
+Arduino programs are built around two core functions — `setup()` runs once on power-on
+for initialization, and `loop()` runs continuously for logic and control.
 
-## Checkpoint Answer
-Changing both delays from 500ms to 250ms doubles the frequency from 1Hz to 2Hz —
-the LED blinks twice as fast because each full on/off cycle takes 500ms instead of 1000ms.
+- `pinMode(pin, mode)` — assigns a pin as INPUT or OUTPUT before using it
+- `digitalWrite(pin, value)` — sets a pin HIGH (5V) or LOW (0V)
+- `delay(ms)` — pauses execution for a given number of milliseconds before moving to the next line
 
-Changing only the HIGH delay shortens the flash (lower duty cycle — short bursts).
-Changing only the LOW delay shortens the gap between flashes without changing flash length.
+## Complex Issue
+Coming from C++, the initial challenge wasn't the syntax — it was the mental shift from
+writing programs that run start to finish, to writing programs structured around hardware.
+`setup()` and `loop()` force you to think in terms of initialization and continuous state,
+which reflects how real embedded systems actually operate rather than how software programs run.
 
 ## Connection to FPGA
-This on/off signal is the same concept as a clock pulse in digital logic.
-Frequency and duty cycle control are the foundation of clock dividers and PWM in FPGA design.
+Arduino uses C++ to bridge code and electronics — `digitalWrite()` directly controls
+voltage on a physical pin. FPGAs do the same thing but at a lower level using Verilog
+or VHDL, where you describe hardware behavior directly rather than writing sequential
+instructions. The concept is the same: control signals in the physical world through code.

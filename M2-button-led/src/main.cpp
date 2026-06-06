@@ -1,51 +1,43 @@
-// M2 — Button + LED with Debounce
-// Concept: digitalRead() reads pin voltage — HIGH or LOW.
-// Problem: physical buttons bounce — one press sends many rapid signals.
-// Solution: debounce — only register a press if the signal is stable for 50ms.
-
-const int BUTTON_PIN = 2;
 const int LED_PIN = 8;
-const int DEBOUNCE_DELAY = 50; // milliseconds signal must be stable to count
+const int BUTTON_PIN = 2;
+const int DEBOUNCE_DELAY = 50; //time between checks to determine stable state
 
-int ledState = LOW;             // current LED state (starts off)
-int lastButtonReading = HIGH;   // last raw reading from the button pin
+int ledState = LOW; // current LED state
+int lastButtonReading = HIGH; // stores the raw reading from last loop
 
-unsigned long lastDebounceTime = 0; // when the button signal last changed
-int lastStableState = HIGH;         // last confirmed stable button state
+unsigned long lastDebounceTime; // timestamp of the last signal change
+int lastStableState; // stores the last confirmed stable button state
 
-void setup() {
-  // INPUT_PULLUP enables the Arduino's internal resistor
-  // This means the pin reads HIGH by default, LOW when button is pressed
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+void setup()
+{
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, ledState);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-  Serial.begin(9600); // open serial monitor to watch what's happening
+  digitalWrite(LED_PIN, ledState);
 }
 
-void loop() {
+void loop()
+{
   int currentReading = digitalRead(BUTTON_PIN);
 
-  // If the raw reading changed, reset the debounce timer
-  if (currentReading != lastButtonReading) {
-    lastDebounceTime = millis(); // record the time of the change
+  if (currentReading != lastButtonReading)
+  {
+    lastDebounceTime = millis();
   }
 
-  // If the signal has been stable for longer than DEBOUNCE_DELAY, trust it
-  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
-
-    // Only act if the stable state actually changed
-    if (currentReading != lastStableState) {
+  if((millis() - lastDebounceTime) > DEBOUNCE_DELAY)
+  {
+    if (currentReading != lastStableState)
+    {
       lastStableState = currentReading;
 
-      // Button pressed = LOW (because of INPUT_PULLUP)
-      if (lastStableState == LOW) {
-        ledState = !ledState;           // toggle LED
+      if (lastStableState == LOW)
+      {
+        ledState = !ledState;
         digitalWrite(LED_PIN, ledState);
-        Serial.println("Button pressed — LED toggled");
       }
     }
   }
 
-  lastButtonReading = currentReading; // save raw reading for next loop
+  lastButtonReading = currentReading;
 }

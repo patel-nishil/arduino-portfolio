@@ -1,41 +1,40 @@
 # M2 — Button + LED
 
 ## What This Does
-Press a button to toggle an LED on/off. Software debounce ensures
-one physical press = one toggle, not multiple.
+Toggles an LED ON and OFF each time a button is pressed, using software debounce
+to ensure one physical press registers as one toggle.
 
 ## Pins Used
 | Pin | Component |
 |-----|-----------|
 | 2   | Push button (INPUT_PULLUP) |
-| 8   | LED (220Ω resistor to GND) |
+| 8   | LED via 220Ω resistor to GND |
 
 ## Wiring Notes
-- Button straddles the center gap of the breadboard
-- Pin 2 connects to one side of the gap, GND to the other side
-- LED long leg → resistor → pin 8 / LED short leg → GND
+- Pin 2 → button → GND
+- Pin 8 → 220Ω resistor → LED long leg → LED short leg → GND
+- Button must straddle the center gap of the breadboard — pin 2 and GND on opposite sides
 
 ## What I Learned
-- `digitalRead()` reads HIGH or LOW from a pin
-- INPUT_PULLUP enables an internal resistor — pin reads HIGH by default, LOW when pressed
-- Contact bounce: physical button contacts bounce 5–20 times per press,
-  sending multiple rapid signals that look like separate presses to the Arduino
-- Debounce fix: only trust a reading if it has been stable for 50ms —
-  by then the mechanical bouncing has stopped
-- `millis()` returns ms since the Arduino powered on — used for non-blocking timing
+- `digitalRead(pin)` — reads a pin as HIGH (5V) or LOW (0V)
+- `INPUT_PULLUP` — enables the Arduino's internal pull-up resistor; pin reads HIGH
+  by default and LOW when the button is pressed
+- `millis()` — returns total milliseconds elapsed since the Arduino powered on;
+  used for non-blocking timing instead of delay()
+- `lastButtonReading` must be updated at the end of every loop or the debounce
+  timer resets every iteration and the stable state check never triggers
 
-## Checkpoint Answer
-Contact bounce is a mechanical issue — when a button is pressed, the metal contacts
-physically bounce off each other 5–20 times before settling, producing multiple
-HIGH/LOW signals from a single press. Without debounce, the toggle logic fires on
-every bounce, leaving the LED in an unpredictable state.
-
-This is different from digital logic propagation delay (tpd/tcd), where the output
-temporarily undefined but always reaches the correct final value on its own.
-Contact bounce never self-corrects — it requires software filtering.
+## Complex Issue
+Contact bounce is a mechanical issue where button contacts physically bounce off
+each other 5–20 times per press, producing rapid HIGH/LOW signals before settling.
+The debounce fix records a timestamp when the signal changes, then waits 50ms —
+if the signal is still the same after 50ms, it is treated as a real state change.
+The key insight is that `lastButtonReading` must be updated at the end of every loop.
+Without it, the timer resets every iteration because the code always thinks the
+signal just changed, so the 50ms stability window never passes.
 
 ## Connection to FPGA
-Input conditioning in digital logic solves the same problem — noisy real-world
-signals must be filtered before a digital system can act on them reliably.
-In FPGA design, debounce logic is typically one of the first modules written
-for any project that takes physical button input.
+Both microcontrollers and FPGAs interface with the physical world and must filter
+out noise before acting on input signals. In FPGA design, a debounce module is
+typically one of the first components written for any project using physical buttons
+— the same problem, solved in Verilog instead of C++.
