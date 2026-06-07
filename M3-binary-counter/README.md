@@ -1,55 +1,40 @@
 # M3 — Binary LED Counter
 
 ## What This Does
-Four LEDs display a 4-bit binary counter incrementing from 0 (0000) to 15 (1111),
-then repeating. Each LED represents one bit — bit 0 (LSB) on the right to bit 3 (MSB) on the left.
+A tally counter from 0–15. Each button press increments the count by 1,
+displayed across 4 LEDs in binary.
 
 ## Pins Used
 | Pin | Bit | Position |
 |-----|-----|----------|
 | 8   | 0   | LSB (rightmost) |
-| 9   | 1   |  |
-| 10  | 2   |  |
+| 9   | 1   | |
+| 10  | 2   | |
 | 11  | 3   | MSB (leftmost) |
+| 2   | —   | Push button (INPUT_PULLUP) |
 
-## Truth Table
-| Count | Bit3 | Bit2 | Bit1 | Bit0 |
-|-------|------|------|------|------|
-| 0     | 0    | 0    | 0    | 0    |
-| 1     | 0    | 0    | 0    | 1    |
-| 2     | 0    | 0    | 1    | 0    |
-| 3     | 0    | 0    | 1    | 1    |
-| 4     | 0    | 1    | 0    | 0    |
-| 5     | 0    | 1    | 0    | 1    |
-| 6     | 0    | 1    | 1    | 0    |
-| 7     | 0    | 1    | 1    | 1    |
-| 8     | 1    | 0    | 0    | 0    |
-| 9     | 1    | 0    | 0    | 1    |
-| 10    | 1    | 0    | 1    | 0    |
-| 11    | 1    | 0    | 1    | 1    |
-| 12    | 1    | 1    | 0    | 0    |
-| 13    | 1    | 1    | 0    | 1    |
-| 14    | 1    | 1    | 1    | 0    |
-| 15    | 1    | 1    | 1    | 1    |
+## Wiring Notes
+- Pins 8–11 → 220Ω resistor → LED long leg → LED short leg → GND
+- Pin 2 → button → GND
+- Button straddles the center gap — pin 2 and GND on opposite sides
 
 ## What I Learned
-- Bitwise AND (&) isolates a specific bit from an integer
-- Right shift (>>) moves bits toward the LSB position
-- (count >> bit) & 1 extracts any single bit from a number
-- Arrays of pins make it easy to control multiple outputs in a loop
+- `>>` right shift — moves all bits right by a given amount
+- `&` bitwise AND — compares two values bit by bit, output is 1 only where both are 1
+- `(count >> bit) & 1` — extracts a single bit from any position in a number
+- Global variables persist between function calls — `count` lives outside `loop()` so `Increment()` can modify it
 
-## Checkpoint Answer
-To extract bit 2 from count: (count >> 2) & 1
-
-- (count >> 2) shifts count right by 2 positions, moving bit 2 into the bit 0 position
-- & 1 masks all other bits to 0, leaving only the value of bit 0 (which is now bit 2)
-- The result is 1 if bit 2 was set, 0 if not
-
-& 1 is a bitwise mask, not a comparison — it forces all bits except bit 0 to 0.
-A comparison would use ==, which returns true/false rather than isolating a bit.
+## Complex Issue
+I wasn't familiar with `>>` and `&` but through a quick search found they can be
+combined in a technique called bit extraction. First, `>>` shifts the target bit
+down to position 0, then `&` masks everything else away, leaving only that bit's
+value. This let me isolate each bit of `count` individually and drive the
+corresponding LED ON or OFF based on it.
 
 ## Connection to FPGA
-This is a 4-bit register with a counter — one of the most fundamental
-building blocks in digital design. In Verilog this would be written as
-a synchronous counter clocked on a rising edge. The bit extraction logic
-maps directly to signal indexing in Verilog: count[0], count[1], etc.
+Bit masking and extraction appear throughout computer science (game development,
+networking, algorithms) and are especially fundamental in FPGA design. Data
+extraction, bitstream compression, hardware cryptography, and state machine flag
+registers all rely on bit masks to read and manipulate individual signals efficiently.
+In this project, the same idea appears in how each LED maps to one bit of the counter
+state, a direct parallel to how FPGA registers expose individual signal lines.
